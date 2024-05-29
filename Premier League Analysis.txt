@@ -1,0 +1,263 @@
+#Premier League is one of the most fantasic leagues in the world. They have all best mangers, players and fans. But, what makes it truly entertaining is no one can predict anything until match is overed !
+There are 6 equally amazing teams try to win the trophy year over year. Not only that, the league has also witnessed victories from the team outside of the top 6. Now, let me reclaim something that interesting
+
+import pandas as pd 
+import numpy as np
+import seaborn as sns
+import matplotlib.pyplot as plt
+
+#import cufflinks as cf
+import plotly.graph_objects as go
+
+# Import all files
+# Test
+pl16 = pd.read_csv(('C:\\Users\\LU VINH XUYEN\\Downloads\\pl_15-16.csv'))
+pl16.head()
+
+pl16 = pd.read_csv('C:\\Users\\LU VINH XUYEN\\Downloads\\pl_15-16.csv')
+pl17 = pd.read_csv('C:\\Users\\LU VINH XUYEN\\Downloads\\pl_16-17.csv')
+pl18 = pd.read_csv('C:\\Users\\LU VINH XUYEN\\Downloads\\pl_17-18.csv')
+pl19 = pd.read_csv('C:\\Users\\LU VINH XUYEN\\Downloads\\pl_18-19.csv')
+pl20 = pd.read_csv('C:\\Users\\LU VINH XUYEN\\Downloads\\pl_19-20.csv')
+
+pl16['Year'] = '2015-2016'
+pl17['Year'] = '2016-2017'
+pl18['Year'] = '2017-2018'
+pl19['Year'] = '2018-2019'
+pl20['Year'] = '2019-2020'
+
+#concat all files
+pl_upto20 = pd.concat([pl16,pl17,pl18,pl19,pl20])
+pl_upto20.head()
+
+pl_upto20.info()
+
+# Leicester City - A magical story  
+# Eliminating players who didn't make any apperance in the 2015/16 season and find the top goalscorer
+pl16 = pl16[pl16['Appearances']!=0]
+
+goalscorers = pl16.nlargest(5,['Goals'])
+goalscorers.plot(kind='bar',x='Name',y='Goals',color='yellow',title = 'Top Goalscorer 2015-16') 
+#As you see in the list of top goalscorer, there are 2 players from Leicester City
+
+#Check top playmakers
+
+playmakers = pl16.nlargest(5,['Assists'])
+playmakers.plot(kind='bar', x ='Name',y ='Assists',title = 'Top playmakers season 2015-16')
+#Well, Riyad Mahrez appreared in both top of goalscorers and playmakers. Clearly, he has been fundamental for Leicester's trophy
+For a bigger picture, let us take a look at goal involvements ( assists + goals )
+
+#Create new column include Goal and Assist
+
+pl16['Involvements'] = pl16['Goals'] + pl16['Assists']
+
+#Select top player of involvement 
+involvements = pl16.nlargest(5,['Involvements']) 
+
+involvements.plot(kind='bar', x ='Name',y='Involvements', color = 'green', title = 'Top player had highest involvements in season 2015/16')
+
+#Successful players from Leicester club, again ! 
+But only score don't make the team can maintain the stability. So let's check out some number in defence, start with N'Golo Kante - a 'beast'
+
+#Extracting data of all midfielders first and then narrowing on Kante 
+midfielders16 = pl16[pl16['Position']=='Midfielder']  
+kante16 = midfielders16[midfielders16['Name'] =="N'Golo Kanté"]
+#Creating a series of midfielders who make top 10 in the number of Interceptions - Duels and tackles 
+
+interceptions = midfielders16.nlargest(10,'Interceptions')[['Name','Interceptions']] 
+duels = midfielders16.nlargest(10,'Duels won')[['Name','Duels won']] 
+tackles = midfielders16.nlargest(10,'Tackles')[['Name','Tackles']] 
+
+for i in [interceptions,duels,tackles]:
+    print(i,"\n") 
+	
+#Kante is 
+1. #1 in the league for Interceptions 
+2. #2 in the league for Duels won 
+3. #1 in the league for Tackles 
+It is some incredible numbers from the defensive midfielder
+
+Now, let me check some of defenders 
+
+If we just check at the Clean Sheets, it may not tell us the whole story. More goals cocnceded reflects on a poor defense 
+    Therefore, I am looking at the 'number of goals conceded per game' as my #1 stats. 
+But it is important to make sure that the defender must has enough appearances. 
+For example, a defender with 2 appearances and 0 goals conceded will have a great 'goals conceded per game' number, however, the defender has not played enough games to be considered 
+
+#Making a dataframe with only defenders 
+defenders = pl16[pl16['Position']=='Defender']
+# Select defenders with more than 30 appearances and making a new column 'Conceded per game' (= Goals conceded/Appearances )
+
+top_def_stats = defenders[defenders['Appearances']>30]
+top_def_stats['Conceded per game'] = top_def_stats['Goals conceded']/top_def_stats['Appearances']
+
+least_conceded = top_def_stats.nsmallest(5,'Conceded per game')
+
+least_conceded.plot(kind = 'bar',x = 'Name',y='Conceded per game',color = 'purple',title = 'Goals conceded per game')
+
+#The above plot reveals the stellar performance of these defenders. We can see that Christian Fuchs and Roberth Huth have been vital in defense for Leicester City as they've conceded fewer goals per game and kept more clean sheets 
+Now, let's briefly look at their goalkeepers - Kasper Schmeichel 
+
+goalkeepers = pl16[pl16['Position']=='Goalkeeper']
+goalkeepers
+
+goalkeepers[goalkeepers['Name']=='Kasper Schmeichel ']   
+#He played all match as possible. Let's compare him with other goalkeepers having similar appearances  
+
+goalkeepers = goalkeepers[goalkeepers['Appearances']>=36]
+goalkeepers[['Name','Appearances','Clean sheets','Goals conceded','Saves']]    
+#Schmeichel is a cut above the rest. While Lloris has conceded 2 fewer goals, he has also played a game lesser
+We must conclude that their manager - Claudio Ranieri, with his incredibly balanced and consistent squad gave Leicester City their wonderful title
+
+# Liverpool's road to becoming champions !  
+#Any Premier League fan can see the improvement in Liverpool's performances since the arrival of Jurgen Klopp. Let's took a look at some numbers over the years and analyse their road to winning the Premier League in 2019/20 
+
+# Balanced Attacking
+Liverpool are clearly an attacking side. Under Klopp, they have taken Gegenpressing to a different level. They had fantasic attackers like Sadio Mane, Mohammed Salah and Roberto Firmino have contributed immensely in goals and assits 
+We will be analysing the data for Liverpool's front 3 who are the main contributors in terms of goals  
+
+salah18 = pl18[pl18['Name']=='Mohamed Salah ']
+firmino18 = pl18[pl18['Name']=='Roberto Firmino ']
+mane18 = pl18[pl18['Name']=='Sadio Mané '] 
+
+liverpool_trio18 = pd.concat([salah18,firmino18,mane18])
+
+salah19 = pl19[pl19['Name']=='Mohamed Salah ']
+firmino19 = pl19[pl19['Name']=='Roberto Firmino ']
+mane19 = pl19[pl19['Name']=='Sadio Mané '] 
+
+liverpool_trio19 = pd.concat([salah19,firmino19,mane19])
+
+salah20 = pl20[pl20['Name']=='Mohamed Salah ']
+firmino20 = pl20[pl20['Name']=='Roberto Firmino ']
+mane20 = pl20[pl20['Name']=='Sadio Mané '] 
+
+liverpool_trio20 = pd.concat([salah20,firmino20,mane20])
+
+liverpool_trio = pd.concat([liverpool_trio18, liverpool_trio19, liverpool_trio20]) 
+g = sns.catplot(x='Year',y ='Goals', hue ='Name',kind='bar',data = liverpool_trio )
+
+i=2018
+for dfs in [liverpool_trio18, liverpool_trio19, liverpool_trio20]:
+    print("\n\t\t()\n\n()\n\n\t\t Total=()".format(i,dfs[['Name','Goals']], dfs['Goals'].sum())) 
+    print("~~~~~~~~~~~~~~~~~~~~~~~~")
+    i+=1
+
+print(g)
+
+#We can clearly see that there is a gradual decline in the number of goal scored. They have gone from 57 to 46 in just 2 seasons. However, they have jumped 3 positions up in those 2 years to win this title 
+
+# Defensive Strength
+Liverpool singed Virgil Van Dijk in January 2018 for a massive 75 million pounds and made him become the most expensive defender at this time. Along with him, Liverpool bought a goalkeeper with the name Alisson Becker who finally put an end to the goalkeeping woes. Let's take a look at some of the numbers analysing their performances 
+
+#Pulling out the 2016/17 goalkeeping stats
+mignolet17 = pl17[pl17['Name']=='Simon Mignolet ']
+karius17 = pl17[pl17['Name']=='Loris Karius ']
+
+tot_clean_sheets17=0 
+tot_conceded17=0 
+
+print("\t\t2017/18 Goalkeeping Stats")
+for dfs in [mignolet17,karius17]:
+    print("\n\n()\n" . format(dfs[['Name','Appearances','Clean sheets','Goals conceded']]))
+    tot_clean_sheets17+= dfs['Clean sheets'].item()
+    tot_conceded17 += dfs['Goals conceded'].item() 
+print("\n\n Total Clean Sheets = ()\nTotal Goals Conceded = {} ") . format(tot_clean_sheets17,tot_conceded17) 
+
+#Pulling out the 2017/18 goalkeeping stats
+mignolet18 = pl18[pl18['Name']=='Simon Mignolet ']
+karius18 = pl18[pl18['Name']=='Loris Karius ']
+
+alisson19 = pl19[pl19['Name']=='Alisson ']
+alisson20 = pl20[pl20['Name']=='Alisson ']
+adrian20 = pl20[pl20['Name']=='Adrián ']
+
+tot_clean_sheets18 = 0
+tot_conceded18 = 0 
+
+print("\t\t2017/18 Goalkeeping Stats")
+for dfs in [mignolet18,karius18]:
+    print("\n\n()\n".format(dfs[["Name", "Appearances", "Clean sheets", "Goals conceded"]]))
+    
+    tot_clean_sheets18 += dfs['Clean sheets'].item()
+    tot_conceded18 += dfs['Goals conceded'].item() 
+    
+print("\n\n Total Clean Sheets = ()\nTotal Goals Conceded = ()\n\n".format(tot_clean_sheets18,tot_conceded18))    
+
+print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+
+print("\t\t2018/19 Goalkeeping Stats \n\n()\n\nTotal Clean Sheets =()\nTotal Goals Conceded()\n\n"
+     .format(alisson19[["Name", "Appearances", "Clean sheets", "Goals conceded"]], alisson19['Clean sheets'].sum(),alisson19['Goals conceded'].sum()))
+
+print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+
+tot_clean_sheets20 = 0
+tot_conceded20 = 0
+
+for dfs in [alisson20,adrian20]:
+    print("\t\t2019/20 Goalkeeping Stats \n\n()\n".
+         format(dfs[["Name", "Appearances", "Clean sheets", "Goals conceded"]]))
+    
+    tot_clean_sheets20 += dfs['Clean sheets'].item()
+    tot_conceded20 += dfs['Goals conceded'].item()
+    
+print("\n\n Total Clean Sheets = ()\nTotal Goals Conceded =()".format(tot_clean_sheets20,tot_conceded20))    
+
+goalie_stats = pd.DataFrame({"Clean sheets":[tot_clean_sheets17, tot_clean_sheets18, alisson19['Clean sheets'].sum(),
+                                            tot_clean_sheets20],"Goal conceded":[tot_conceded17,tot_conceded18,alisson19['Goals conceded'].sum(),tot_conceded20],
+                            "Year":["2016/17","2017/18","2018/19","2019/20"]}) 
+goalie_stats.plot(kind="bar",x = "Year",y = "Clean sheets") 
+
+#The chart above tells that Alisson's impact in goal. In his first season at Liverpool, he ended up with 21 clean sheets while only conceding 22 goals , he also won the Golden Glove for this performance 
+Coming the second season, he conceded 23 goals in 29 appearances 
+
+defenders = pl_upto20[pl_upto20['Position']=='Defender']
+van_dijk = defenders[defenders['Name'] == 'Virgil van Dijk ']
+van_dijk[["Name","Year", "Appearances", "Clean sheets", "Goals conceded", "Clearances", "Headed Clearance","Goals" ,"Assists", "Passes per match","Duels won", "Interceptions","Last man tackles"]]
+
+#Van Dijk's attaking,passing and goalscoring also significantly improved after joining Liverpool in 2018 
+
+However, this didn't result in any drop in his defensive performances and they remained consistent throughout 
+
+From the number below, you can see the improvement in defensive numbers in the second half of the 2017/18 season (After Van Dijk was singed). The goalkeeper in the second half of the season was Loris Karius 
+
+mignolet17 = pl17[pl17['Name']=='Simon Mignolet ']
+karius17 = pl17[pl17['Name']=='Loris Karius ']
+
+for dfs in [mignolet18,karius18]:
+    print("\n\n{}\n", format(dfs[["Name", "Appearances", "Clean sheets", "Goals conceded"]]))
+
+#As for 2019/20 season, Alisson was injured for a significant time  and Liverpool's second option Adrian had to replace him. This is a major reason for the amount of goals having been conceded
+
+# Conclusion
+Leicester and Liverpool winning the league may seem astonising, but analysis of individual player performances makes the story clear 
+
+Leicester had strong players in every position of the field that were incredible form and their numbers were significantly higher than the rest while Liverpool's change in attacking psychology and their new signings slowly turned the tides in their favour 
+
+# Questions
+1) Who had the highest number of goals and assists across 5 seasons
+top_scorers = pl_upto20.groupby('Name')['Goals'].sum().nlargest(5) 
+top_scorers_plot = top_scorers.plot(kind = 'barh',x= 'Name',y='Goals',color = 'pink', title = 'Top goalscorers from 2015/16 to 2019/20')
+
+print("{}\n\n{}".format(top_scorers,top_scorers_plot))
+
+top_playmakers = pl_upto20.groupby('Name')['Assists'].sum().nlargest(5) 
+top_playmakers_plot = top_playmakers.plot(kind = 'barh',x= 'Name',y='Assists',color = 'lime', title = 'Top playmakers from 2015/16 to 2019/20')
+
+print("()\n\n{}".format(top_playmakers,top_playmakers_plot))
+
+#Top Goalscorers is Sergio Aguero with 120 goals 
+Top Playmeker is Kevin De Bruyne with 65 assists
+
+# 2) Which season had the highest number of goals 
+pl16_goals = int(pl16['Goals'].sum())
+pl17_goals = int(pl17['Goals'].sum())
+pl18_goals = int(pl18['Goals'].sum())
+pl19_goals = int(pl19['Goals'].sum())
+pl20_goals = int(pl20['Goals'].sum())
+
+overall = pd.DataFrame({'Goals':[pl16_goals, pl17_goals, pl18_goals, pl19_goals, pl20_goals],
+                       'Year':['2015/16', '2016/17', '2017/18',' 2018/19', '2019/20']}) 
+print("{}\n\n{}".format(overall,overall.plot(kind = 'line',x='Year', y ='Goals',color='DarkGreen',title = 'Total goals per seasons'))) 
+
+The 2016/17 had the highest number of goals with 983 goals	
